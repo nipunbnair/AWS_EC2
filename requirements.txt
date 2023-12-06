@@ -4,4 +4,6 @@ keras
 opencv-python
 numpy
 pyngrok
-
+torch
+tensorflow
+PIL
