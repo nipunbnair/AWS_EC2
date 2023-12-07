@@ -57,5 +57,5 @@ def main():
     # Display the uploaded image
     st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
   main()
