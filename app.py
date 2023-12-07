@@ -1,34 +1,61 @@
 import streamlit as st
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 import cv2
 import numpy as np
 
-
 def classify_file(file):
-    model = load_model('my_model.h5')
-    model.compile(loss='binary_crossentropy',optimizer='rmsprop',metrics=['accuracy'])
-    img = cv2.imread(file)
-    img = cv2.resize(img,(320,240))
-    img = np.reshape(img,[1,320,240,3])
-    classes = model.predict_classes(img)
-    print(classes)
-    return str(classes)
+  """
+  Classifies an image file.
+
+  Args:
+    file: Uploaded image file.
+
+  Returns:
+    str: The predicted class label.
+  """
+  # Load the model
+  model = load_model('my_model.h5')
+
+  # Read the uploaded image
+  try:
+    img = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
+  except Exception as e:
+    print(f"Error reading image: {e}")
+    return None
+
+  # Resize the image
+  img = cv2.resize(img, (64, 64))
+
+  # Reshape the image for model prediction
+  img = np.reshape(img, [1, 64, 64, 3])
+
+  # Predict the class
+  classes = np.argmax(model.predict(img))
+
+  # Return the predicted class label
+  return str(classes)
 
 def main():
-    st.title("File Upload and Classification")
+  st.title("File Upload and Classification")
 
-    uploaded_file = st.file_uploader("Select Image:", type=["jpg", "jpeg", "png"])
+  # Allow uploading images of various formats
+  uploaded_file = st.file_uploader("Select Image:", type=["jpg", "jpeg", "png", "bmp"])
 
-    if uploaded_file is not None:
-        # Perform classification on file upload
-        classifier_response = classify_file(uploaded_file)
+  if uploaded_file is not None:
+    # Perform classification on uploaded file
+    classifier_response = classify_file(uploaded_file)
 
-        # Display classification result
-        st.subheader("Classification Result")
-        st.write(f"Classification Result: {classifier_response}")
+    # Handle error in case of unsuccessful classification
+    if classifier_response is None:
+      st.error("Error classifying the image. Please try again.")
+      return
 
-        # Display the uploaded image
-        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+    # Display classification result
+    st.subheader("Classification Result")
+    st.write(f"Classification Result: {classifier_response}")
 
-if __name__ == "__main__":
-    main()
+    # Display the uploaded image
+    st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+
+if _name_ == "_main_":
+  main()
